@@ -1,4 +1,10 @@
-import { Injectable, Inject, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  Inject,
+  ConflictException,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
 import { RegisterUsersDTO } from './users.dto';
 import { Users } from './users.entity';
@@ -38,5 +44,23 @@ export class UsersService {
       .execute();
 
     return { message: 'Success Register' };
+  }
+
+  async validateLogin(email: string, password: string): Promise<Users> {
+    const user = await this.usersRepository.findOneBy({
+      email,
+    });
+
+    if (!user) {
+      throw new NotFoundException(`Email ${email} not registered`);
+    }
+
+    const validatePassword = await bcrypt.hash(password, user.salt);
+
+    if (validatePassword !== user.password) {
+      throw new BadRequestException(`Password ${password} not match`);
+    }
+
+    return user;
   }
 }
