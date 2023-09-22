@@ -8,7 +8,7 @@ import { Repository } from 'typeorm';
 export class BookService {
   constructor(
     @Inject('BOOK_REPOSITORY')
-    public bookRepository: Repository<Book>,
+    private bookRepository: Repository<Book>,
   ) {}
 
   async getAllbook(filter: QueryBookDTO): Promise<Book[]> {
@@ -31,7 +31,12 @@ export class BookService {
   }
 
   async getOneBook(id: string): Promise<Book> {
-    return await this.bookRepository.findOneBy({ id });
+    const data = await this.bookRepository.findOneBy({ id });
+
+    if (!data) {
+      throw new NotFoundException(`Book id : ${id} not found`);
+    }
+    return data;
   }
 
   async createBook(payload: CreateBookDTO) {
@@ -55,34 +60,43 @@ export class BookService {
     return { message: 'Success Create' };
   }
 
-  // updateBook(id: string, payload: UpdateBookDTO) {
-  //   const bookIdx = this.findBookById(id);
-  //   const { title, category, author, year } = payload;
-  //   this.book[bookIdx].title = title;
-  //   this.book[bookIdx].category = category;
-  //   this.book[bookIdx].author = author;
-  //   this.book[bookIdx].year = year;
+  async updateBook(id: string, payload: UpdateBookDTO) {
+    const checkBook = await this.bookRepository.findOneBy({ id });
 
-  //   return {
-  //     message: 'Book Update',
-  //   };
-  // }
+    if (!checkBook) {
+      throw new NotFoundException(`Book id : ${id} not found`);
+    }
 
-  // findBookById(id: string) {
-  //   const findBook = this.book.findIndex((b) => b.id === id);
-  //   if (findBook === -1) {
-  //     throw new NotFoundException(`Book id : ${id} not found`);
-  //   }
+    const { title, category, author, year } = payload;
 
-  //   return findBook;
-  // }
+    await this.bookRepository
+      .createQueryBuilder()
+      .update(Book)
+      .set({
+        title,
+        author,
+        category,
+        year: Number(year),
+      })
+      .where('id = :id', { id })
+      .execute();
 
-  // deleteBook(id: string) {
-  //   const bookIdx = this.findBookById(id);
-  //   this.book.splice(bookIdx, 1);
+    return {
+      message: 'Book Update',
+    };
+  }
 
-  //   return {
-  //     message: 'Delete Success',
-  //   };
-  // }
+  async deleteBook(id: string) {
+    const checkBook = await this.bookRepository.findOneBy({ id });
+
+    if (!checkBook) {
+      throw new NotFoundException(`Book id : ${id} not found`);
+    }
+
+    await this.bookRepository.delete(id);
+
+    return {
+      message: 'Delete Success',
+    };
+  }
 }

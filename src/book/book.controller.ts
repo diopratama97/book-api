@@ -35,13 +35,13 @@ export class BookController {
     return this.booksService.createBook(payload);
   }
 
-  // @Put('/:id')
-  // updateBook(@Param() param: ParamBookDTO, @Body() payload: UpdateBookDTO) {
-  //   return this.booksService.updateBook(param.id, payload);
-  // }
+  @Put('/:id')
+  updateBook(@Param() param: ParamBookDTO, @Body() payload: UpdateBookDTO) {
+    return this.booksService.updateBook(param.id, payload);
+  }
 
-  // @Delete('/:id')
-  // deleteBook(@Param() param: ParamBookDTO) {
-  //   return this.booksService.deleteBook(param.id);
-  // }
+  @Delete('/:id')
+  deleteBook(@Param() param: ParamBookDTO) {
+    return this.booksService.deleteBook(param.id);
+  }
 }
