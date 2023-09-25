@@ -9,3 +9,7 @@ export class loginDTO {
   @MinLength(5)
   password: string;
 }
+
+export class refreshAccessTokenDTO {
+  refresh_token: string;
+}
