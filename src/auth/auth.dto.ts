@@ -11,5 +11,6 @@ export class loginDTO {
 }
 
 export class refreshAccessTokenDTO {
+  @IsNotEmpty()
   refresh_token: string;
 }
