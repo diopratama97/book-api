@@ -63,4 +63,8 @@ export class UsersService {
 
     return user;
   }
+
+  async findUser(id: string): Promise<Users> {
+    return await this.usersRepository.findOneBy({ id });
+  }
 }

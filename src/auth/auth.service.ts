@@ -2,6 +2,7 @@ import {
   Inject,
   Injectable,
   InternalServerErrorException,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -118,5 +119,26 @@ export class AuthService {
 
     const access_token = await this.createAccessToken(data.user.id);
     return { access_token };
+  }
+
+  async revokeToken(id: string) {
+    const refreshToken = await this.refreshTokenRepository.findOneBy({ id });
+
+    if (!refreshToken) {
+      throw new NotFoundException('Refresh token not found');
+    }
+
+    await this.refreshTokenRepository
+      .createQueryBuilder()
+      .update(RefreshToken)
+      .set({
+        isRevoked: true,
+      })
+      .where('id = :id', { id })
+      .execute();
+
+    return {
+      message: 'Revoke token success',
+    };
   }
 }
